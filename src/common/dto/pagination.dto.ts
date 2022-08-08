@@ -9,5 +9,15 @@ export class PaginationDto {
   @IsOptional()
   @IsNumber()
   @IsPositive()
-  offten?: number;
+  page?: number;
+}
+
+export class PaginationResultDto extends PaginationDto {
+  @IsNumber()
+  total: number;
+}
+
+export class PaginationResultWithDataDto<T> extends PaginationResultDto {
+  @IsNumber()
+  data: T[];
 }

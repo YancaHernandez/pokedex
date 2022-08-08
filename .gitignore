@@ -5,6 +5,9 @@
 /mongo
 
 .env
+.env.prod
+.env.template
+
 yarn.lock
 # Logs
 logs

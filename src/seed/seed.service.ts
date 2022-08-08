@@ -1,36 +1,57 @@
 import { Injectable } from '@nestjs/common';
-import axios from 'axios';
-import { PokeResponse } from './interface/poke-response.interface';
 import { InjectModel } from '@nestjs/mongoose';
-import { Pokemon } from '../pokemon/entities/pokemon.entity';
 import { Model } from 'mongoose';
-import { AxiosAdapter } from '../common/adapter/axios.adapter';
+import { User } from '../users/entities/users.entity';
+import { usersData } from './data/users.data';
+import * as bcrypt from 'bcrypt';
+import { Employee } from '../employee/entities/employee.entity';
+import { employeesData } from './data/employes.data';
 
 @Injectable()
 export class SeedService {
   constructor(
-    @InjectModel(Pokemon.name)
-    private readonly pokemonModel: Model<Pokemon>,
-    private http: AxiosAdapter,
+    @InjectModel(User.name)
+    private readonly userModel: Model<User>,
+    @InjectModel(Employee.name)
+    private readonly employeeModel: Model<Employee>,
   ) {}
 
   async executeSeed() {
-    await this.pokemonModel.deleteMany({});
-    const data = await this.http.get<PokeResponse>(
-      'https://pokeapi.co/api/v2/pokemon?limit=650',
-    );
+    await this.executeSeedUsers();
+    await this.executeSeedEmployees();
+    return 'Seeded  executeds';
+  }
 
-    const pokemonsToInsert = [];
-    data.results.forEach(({ name, url }) => {
-      const segments = url.split('/');
-      const no = +segments[segments.length - 2];
+  async executeSeedUsers() {
+    await this.userModel.deleteMany({});
+    const data = usersData;
 
-      pokemonsToInsert.push({
-        name,
-        no,
+    const usersToInsert = [];
+    const salt = 8;
+    for await (let { username, password, email } of data) {
+      password = await bcrypt.hash(password, salt);
+      usersToInsert.push({
+        username,
+        password,
+        email,
       });
-    });
-    await this.pokemonModel.insertMany(pokemonsToInsert);
-    return 'Seeded pokemons executed';
+    }
+    await this.userModel.insertMany(usersToInsert);
+    return 'Seeded users executed';
+  }
+
+  async executeSeedEmployees() {
+    await this.employeeModel.deleteMany({});
+    const data = employeesData;
+
+    const employeeesToInsert = [];
+    const salt = 8;
+    for await (let { name } of data) {
+      employeeesToInsert.push({
+        name,
+      });
+    }
+    await this.employeeModel.insertMany(employeeesToInsert);
+    return 'Seeded employees executed';
   }
 }
