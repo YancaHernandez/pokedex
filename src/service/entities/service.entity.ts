@@ -1,5 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document } from 'mongoose';
+import mongoose, { Document, SchemaTypes, Types } from 'mongoose';
 import { Employee } from '../../employee/entities/employee.entity';
 
 @Schema()
@@ -20,10 +20,11 @@ export class Service extends Document {
   percentage: number;
 
   @Prop({
+    type: mongoose.Schema.Types.ObjectId,
+    ref: Employee.name,
     required: true,
-    ref: 'employee',
   })
-  employee: Employee;
+  employee: Types.ObjectId;
 
   @Prop({
     required: true,

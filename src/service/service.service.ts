@@ -5,13 +5,12 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { isValidObjectId, Model } from 'mongoose';
+import { isValidObjectId, Model, Types } from 'mongoose';
 import { Service } from './entities/service.entity';
 import { CreateServiceDto } from './dto/create-service.dto';
 import { Employee } from '../employee/entities/employee.entity';
 import { PaginationDto } from '../common/dto/pagination.dto';
 import { UpdateServiceDto } from './dto/update-service.dto';
-import { EmployeeService } from '../employee/employee.service';
 
 @Injectable()
 export class ServiceService {
@@ -30,36 +29,45 @@ export class ServiceService {
 
     if (!employee) throw new BadRequestException(`Employee not found`);
 
-    service.employee = employee;
     service.gain = (service.price * service.percentage) / 100;
     service.payment = service.price - service.gain;
+    service.employee = employee._id;
+    await service.save();
     try {
-      return await service.save();
+      if (employee.services)
+        employee.services = [...employee.services, service._id];
+      else employee.services = [service._id];
+
+      await employee.save();
+      return { ...createServiceDto, _id: service._id, employee };
     } catch (error) {
       this.handleException(error);
     }
   }
 
   findAll(paginationDto: PaginationDto) {
-    const { limit = 10, page = 0 } = paginationDto;
+    const { limit = 10, page = 1 } = paginationDto;
     return this.serviceModel
       .find()
+      .populate({
+        path: 'employee',
+        select: 'name',
+      })
       .limit(limit)
-      .skip(page * limit);
+      .skip((page - 1) * limit)
+      .exec();
   }
 
   async findOne(term: string) {
     let service: Service;
 
-    if (!service && isValidObjectId(term)) {
+    if (!service && isValidObjectId(term))
       service = await this.serviceModel.findById(term);
-    }
 
-    if (!service) {
+    if (!service)
       service = await this.serviceModel.findOne({
         name: term,
       });
-    }
 
     if (!service) throw new NotFoundException(`Service not found`);
 
@@ -73,7 +81,7 @@ export class ServiceService {
         updateServiceDto.employeeId,
       );
       if (!employee) throw new BadRequestException(`Employee not found`);
-      service.employee = employee;
+      // service.employee = employee._id;
     }
 
     try {
@@ -85,9 +93,35 @@ export class ServiceService {
   }
 
   async remove(id: string) {
-    const { deletedCount } = await this.serviceModel.deleteOne({ _id: id });
-    if (deletedCount === 0)
-      throw new BadRequestException(`Service with id ${id} not found`);
+    const service = await this.serviceModel.findById(id);
+    if (!service) throw new NotFoundException(`Service not found`);
+
+    const employee = await this.employeeModel.findById(service.employee);
+
+    employee.services = employee.services.filter((serviceId: Types.ObjectId) =>
+      serviceId.equals(service._id),
+    );
+    await employee.save();
+    const { deletedCount } = await this.serviceModel.deleteOne({
+      _id: id,
+    });
+    if (deletedCount === 0) throw new NotFoundException(`Service not found`);
+    return;
+  }
+
+  async removeAll() {
+    const services = await this.serviceModel.find();
+    for await (const service of services) {
+      const employe = await this.employeeModel.findById(service.employee);
+      if (employe) {
+        employe.services = employe.services.filter(
+          (serviceId: Types.ObjectId) => serviceId.equals(service._id),
+        );
+        await employe.save();
+      }
+    }
+    const { deletedCount } = await this.serviceModel.deleteMany({});
+    if (deletedCount === 0) throw new NotFoundException(`Services not found`);
     return;
   }
 

@@ -1,5 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document } from 'mongoose';
+import { Document, SchemaTypes, Types } from 'mongoose';
+import { Service } from '../../service/entities/service.entity';
 
 @Schema()
 export class Employee extends Document {
@@ -8,6 +9,24 @@ export class Employee extends Document {
     index: true,
   })
   name: string;
+
+  @Prop({
+    default: 'active',
+    enum: ['active', 'inactive'],
+  })
+  status: string;
+
+  @Prop({
+    required: false,
+    type: [SchemaTypes.ObjectId],
+    ref: 'Service',
+  })
+  services: Types.ObjectId[];
 }
 
 export const EmployeeShema = SchemaFactory.createForClass(Employee);
+// EmployeeShema.virtual('Services', {
+//   ref: 'Service',
+//   localField: '_id',
+//   foreignField: 'employee',
+// });

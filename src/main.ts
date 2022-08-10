@@ -17,15 +17,17 @@ async function bootstrap() {
     }),
   );
   const config = new DocumentBuilder()
+    .addBearerAuth()
     .setTitle('Delux example')
     .setDescription('Api para delux example')
     .setVersion('1.0')
-    .addTag('User')
+    .addTag('Auth')
     .addTag('Employee')
     .addTag('Service')
     .addTag('Seed')
     .build();
   const document = SwaggerModule.createDocument(app, config);
+
   SwaggerModule.setup('api', app, document);
   app.enableCors();
   await app.listen(process.env.PORT);

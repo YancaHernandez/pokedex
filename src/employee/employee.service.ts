@@ -3,13 +3,12 @@ import {
   BadRequestException,
   Injectable,
   InternalServerErrorException,
-  NotFoundException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { isValidObjectId, Model } from 'mongoose';
 import { Employee } from './entities/employee.entity';
 import { CreateEmployeeDto } from './dto/create-employee.dto';
-import { PaginationDto } from '../common/dto/pagination.dto';
+import { QueryFindAllDto } from '../common/dto/pagination.dto';
 
 @Injectable()
 export class EmployeeService {
@@ -27,11 +26,27 @@ export class EmployeeService {
     }
   }
 
-  findAll(paginationDto: PaginationDto) {
-    // const { limit = 10, page = 0 } = paginationDto;
-    return this.employeeModel.find();
-    // .limit(limit)
-    // .skip(page * limit);
+  findAll(queryFindAllDto: QueryFindAllDto) {
+    const { limit = 100, page = 1, status = 'active' } = queryFindAllDto;
+
+    return this.employeeModel
+      .find({
+        isActive: status,
+      })
+      .populate({
+        path: 'services',
+        select: [
+          'name',
+          'price',
+          'percentage',
+          'gain',
+          'payment',
+          'createdAt',
+          'updatedAt',
+        ],
+      })
+      .limit(limit)
+      .skip((page - 1) * limit);
   }
 
   async findOne(term: string) {
@@ -65,11 +80,15 @@ export class EmployeeService {
     }
   }
 
-  async remove(id: string) {
-    const { deletedCount } = await this.employeeModel.deleteOne({ _id: id });
-    if (deletedCount === 0)
-      throw new BadRequestException(`Employee with id ${id} not found`);
-    return;
+  async statusChange(id: string) {
+    let employee = await this.findOne(id);
+    employee.status = 'inactive';
+    try {
+      await employee.save();
+      return employee;
+    } catch (error) {
+      this.handleException(error);
+    }
   }
 
   handleException(error: any) {

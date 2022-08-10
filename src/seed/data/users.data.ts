@@ -1,8 +1,8 @@
-import { CreateUserDto } from '../../users/Dto/user.dto';
+import { CreateUserDto } from '../../auth/dto/create-user.dto';
 export const usersData: CreateUserDto[] = [
   {
-    username: 'admin',
     email: 'admin@admin.com',
     password: 'admin123',
+    fullName: 'Administrador',
   },
 ];

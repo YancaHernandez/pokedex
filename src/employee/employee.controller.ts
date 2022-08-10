@@ -10,10 +10,10 @@ import {
 } from '@nestjs/common';
 import { EmployeeService } from './employee.service';
 import { ParseMonogIdPipe } from '../common/pipes/parse-monog-id.pipe';
-import { PaginationDto } from '../common/dto/pagination.dto';
+import { PaginationDto, QueryFindAllDto } from '../common/dto/pagination.dto';
 import { CreateEmployeeDto } from './dto/create-employee.dto';
 import { UpdateEmployeeDto } from './dto/update-employee.dto';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiQuery, ApiTags } from '@nestjs/swagger';
 
 @Controller('employee')
 @ApiTags('Employee')
@@ -26,8 +26,15 @@ export class EmployeeController {
   }
 
   @Get()
-  findAll(@Query() paginationDto: PaginationDto) {
-    return this.employeeService.findAll(paginationDto);
+  @ApiQuery({
+    name: 'status',
+    description: 'Status of the employee',
+    enum: ['active', 'inactive'],
+    required: false,
+  })
+  findAll(@Query() queryFindAllDto: QueryFindAllDto) {
+    console.log(queryFindAllDto);
+    return this.employeeService.findAll(queryFindAllDto);
   }
 
   @Get(':term')
@@ -43,8 +50,8 @@ export class EmployeeController {
     return this.employeeService.update(term, updatePokemonDto);
   }
 
-  @Delete(':id')
-  remove(@Param('id', ParseMonogIdPipe) id: string) {
-    return this.employeeService.remove(id);
+  @Patch('/:id/statusChange')
+  statusChange(@Param('id', ParseMonogIdPipe) id: string) {
+    return this.employeeService.statusChange(id);
   }
 }

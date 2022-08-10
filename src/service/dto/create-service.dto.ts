@@ -7,6 +7,7 @@ import {
   Min,
   MinLength,
 } from 'class-validator';
+import { Types } from 'mongoose';
 
 export class CreateServiceDto {
   @IsString()
@@ -15,6 +16,7 @@ export class CreateServiceDto {
     description: 'Service name',
     required: true,
     type: String,
+    example: 'Service 1',
   })
   name: string;
 
@@ -24,6 +26,7 @@ export class CreateServiceDto {
     description: 'Price of service',
     required: true,
     type: Number,
+    example: 100,
   })
   price: number;
 
@@ -33,6 +36,7 @@ export class CreateServiceDto {
     description: 'Percentage of service',
     required: true,
     type: Number,
+    example: 10,
   })
   percentage: number;
 
@@ -40,6 +44,7 @@ export class CreateServiceDto {
   @ApiProperty({
     description: 'Id of employee',
     required: true,
+    example: '5e8f8f8f8f8f8f8f8f8f8f8',
   })
-  employeeId: string;
+  employeeId: Types.ObjectId;
 }

@@ -1,11 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { User } from '../users/entities/users.entity';
 import { usersData } from './data/users.data';
 import * as bcrypt from 'bcrypt';
 import { Employee } from '../employee/entities/employee.entity';
 import { employeesData } from './data/employes.data';
+import { User } from '../auth/entities/user.entity';
 
 @Injectable()
 export class SeedService {
@@ -27,13 +27,10 @@ export class SeedService {
     const data = usersData;
 
     const usersToInsert = [];
-    const salt = 8;
-    for await (let { username, password, email } of data) {
-      password = await bcrypt.hash(password, salt);
+    for await (let user of data) {
       usersToInsert.push({
-        username,
-        password,
-        email,
+        ...user,
+        password: this.hashPassword(user.password),
       });
     }
     await this.userModel.insertMany(usersToInsert);
@@ -45,7 +42,6 @@ export class SeedService {
     const data = employeesData;
 
     const employeeesToInsert = [];
-    const salt = 8;
     for await (let { name } of data) {
       employeeesToInsert.push({
         name,
@@ -53,5 +49,9 @@ export class SeedService {
     }
     await this.employeeModel.insertMany(employeeesToInsert);
     return 'Seeded employees executed';
+  }
+
+  hashPassword(password: string) {
+    return bcrypt.hashSync(password, 8);
   }
 }

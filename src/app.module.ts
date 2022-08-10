@@ -7,9 +7,9 @@ import { SeedModule } from './seed/seed.module';
 import { ConfigModule } from '@nestjs/config';
 import { EnvConfig } from './common/config/env.config';
 import { JoiValidationShape } from './common/config/joi.validation';
-import { UsersModule } from './users/users.module';
 import { EmployeeModule } from './employee/employee.module';
 import { ServiceModule } from './service/service.module';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
@@ -22,11 +22,12 @@ import { ServiceModule } from './service/service.module';
       rootPath: join(__dirname, '..', 'public'),
     }),
     MongooseModule.forRoot(process.env.MONGODB),
-    UsersModule,
+    // UsersModule,
     EmployeeModule,
     CommonModule,
     SeedModule,
     ServiceModule,
+    AuthModule,
   ],
   controllers: [],
   providers: [],
