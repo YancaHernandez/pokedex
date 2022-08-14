@@ -45,10 +45,10 @@ export class AuthService {
       })
       .select('_id fullName email password ');
 
-    if (!user) throw new BadRequestException('Credentials are invalid');
+    if (!user) throw new BadRequestException('Las credenciales son invalidas');
 
     if (!bcrypt.compareSync(password, user.password))
-      throw new BadRequestException('Credentials are invalid');
+      throw new BadRequestException('Las credenciales son invalidas');
 
     user.password = undefined;
     return {

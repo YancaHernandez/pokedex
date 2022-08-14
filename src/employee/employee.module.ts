@@ -4,6 +4,7 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { ConfigModule } from '@nestjs/config';
 import { EmployeeService } from './employee.service';
 import { EmployeeShema, Employee } from './entities/employee.entity';
+import { AuthModule } from '../auth/auth.module';
 
 @Module({
   controllers: [EmployeeController],
@@ -15,6 +16,7 @@ import { EmployeeShema, Employee } from './entities/employee.entity';
         schema: EmployeeShema,
       },
     ]),
+    AuthModule,
   ],
   exports: [EmployeeService, MongooseModule],
 })

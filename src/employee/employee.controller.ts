@@ -7,13 +7,15 @@ import {
   Param,
   Delete,
   Query,
+  UseGuards,
 } from '@nestjs/common';
 import { EmployeeService } from './employee.service';
 import { ParseMonogIdPipe } from '../common/pipes/parse-monog-id.pipe';
-import { PaginationDto, QueryFindAllDto } from '../common/dto/pagination.dto';
+import { QueryFindAllDto } from '../common/dto/pagination.dto';
 import { CreateEmployeeDto } from './dto/create-employee.dto';
 import { UpdateEmployeeDto } from './dto/update-employee.dto';
-import { ApiQuery, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiQuery, ApiTags } from '@nestjs/swagger';
+import { AuthGuard } from '@nestjs/passport';
 
 @Controller('employee')
 @ApiTags('Employee')
@@ -32,8 +34,9 @@ export class EmployeeController {
     enum: ['active', 'inactive'],
     required: false,
   })
+  @UseGuards(AuthGuard())
+  @ApiBearerAuth()
   findAll(@Query() queryFindAllDto: QueryFindAllDto) {
-    console.log(queryFindAllDto);
     return this.employeeService.findAll(queryFindAllDto);
   }
 
