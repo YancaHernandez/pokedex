@@ -13,7 +13,7 @@ import { ServiceService } from './service.service';
 import { CreateServiceDto } from './dto/create-service.dto';
 import { UpdateServiceDto } from './dto/update-service.dto';
 import { ApiBearerAuth, ApiBody, ApiQuery, ApiTags } from '@nestjs/swagger';
-import { PaginationDto } from '../common/dto/pagination.dto';
+import { PaginationDto, QueryFindAllDto } from '../common/dto/pagination.dto';
 import { AuthGuard } from '@nestjs/passport';
 
 @Controller('service')
@@ -32,16 +32,8 @@ export class ServiceController {
   }
 
   @Get()
-  @ApiQuery({
-    name: 'limit',
-    example: 10,
-  })
-  @ApiQuery({
-    name: 'page',
-    example: 1,
-  })
-  findAll(@Query() paginationDto: PaginationDto) {
-    return this.serviceService.findAll(paginationDto);
+  findAll(@Query() queryFindAllDto: QueryFindAllDto) {
+    return this.serviceService.findAll(queryFindAllDto);
   }
 
   @Get(':id')

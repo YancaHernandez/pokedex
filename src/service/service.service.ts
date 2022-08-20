@@ -9,8 +9,9 @@ import { isValidObjectId, Model, Types } from 'mongoose';
 import { Service } from './entities/service.entity';
 import { CreateServiceDto } from './dto/create-service.dto';
 import { Employee } from '../employee/entities/employee.entity';
-import { PaginationDto } from '../common/dto/pagination.dto';
+import { PaginationDto, QueryFindAllDto } from '../common/dto/pagination.dto';
 import { UpdateServiceDto } from './dto/update-service.dto';
+import moment = require('moment');
 
 @Injectable()
 export class ServiceService {
@@ -45,10 +46,17 @@ export class ServiceService {
     }
   }
 
-  findAll(paginationDto: PaginationDto) {
-    const { limit = 10, page = 1 } = paginationDto;
+  findAll(qeryFindAllDto: QueryFindAllDto) {
+    const { limit = 10, page = 1, dateTime = '' } = qeryFindAllDto;
     return this.serviceModel
-      .find()
+      .find({
+        ...(dateTime && {
+          createdAt: {
+            $gte: moment(dateTime).startOf('day').toDate(),
+            $lte: moment(dateTime).endOf('day').toDate(),
+          },
+        }),
+      })
       .populate({
         path: 'employee',
         select: 'name',
