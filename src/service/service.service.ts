@@ -46,20 +46,17 @@ export class ServiceService {
     }
   }
 
-  findAll(qeryFindAllDto: QueryFindAllDto) {
-    const { limit = 10, page = 1, dateTime = '' } = qeryFindAllDto;
+  findAll(queryFindAllDto: QueryFindAllDto) {
+    const { limit = 10, page = 1, day = '' } = queryFindAllDto;
     return this.serviceModel
       .find({
-        ...(dateTime && {
-          createdAt: {
-            $gte: moment(dateTime).startOf('day').toDate(),
-            $lte: moment(dateTime).endOf('day').toDate(),
-          },
+        ...(day !== '' && {
+          createdAt: day,
         }),
       })
       .populate({
         path: 'employee',
-        select: 'name',
+        select: ['name', 'status'],
       })
       .limit(limit)
       .skip((page - 1) * limit)

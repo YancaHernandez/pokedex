@@ -1,4 +1,4 @@
-import { ApiParam, ApiProperty, ApiQuery } from '@nestjs/swagger';
+import { ApiParam, ApiQuery } from '@nestjs/swagger';
 import {
   IsDateString,
   IsEnum,
@@ -49,9 +49,5 @@ export class QueryFindAllDto extends PaginationDto {
 
   @IsOptional()
   @IsDateString()
-  @ApiProperty({
-    description: 'Day of the service',
-    example: '2022-08-09',
-  })
-  dateTime: string;
+  day: string;
 }
