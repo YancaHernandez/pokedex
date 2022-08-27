@@ -45,6 +45,11 @@ export class EmployeeController {
     return this.employeeService.findOne(term);
   }
 
+  @Get('findByName/:name')
+  findOneByName(@Param('name') name: string) {
+    return this.employeeService.findOneByName(name);
+  }
+
   @Patch(':term')
   update(
     @Param('term') term: string,
@@ -56,5 +61,10 @@ export class EmployeeController {
   @Patch('/:id/statusChange')
   statusChange(@Param('id', ParseMonogIdPipe) id: string) {
     return this.employeeService.statusChange(id);
+  }
+
+  @Delete('/:id')
+  remove(@Param('id', ParseMonogIdPipe) id: string) {
+    return this.employeeService.remove(id);
   }
 }

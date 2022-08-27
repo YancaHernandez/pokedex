@@ -8,7 +8,10 @@ import { InjectModel } from '@nestjs/mongoose';
 import { isValidObjectId, Model } from 'mongoose';
 import { Employee } from './entities/employee.entity';
 import { CreateEmployeeDto } from './dto/create-employee.dto';
-import { QueryFindAllDto } from '../common/dto/pagination.dto';
+import {
+  PaginationResultWithDataDto,
+  QueryFindAllDto,
+} from '../common/dto/pagination.dto';
 
 @Injectable()
 export class EmployeeService {
@@ -26,12 +29,14 @@ export class EmployeeService {
     }
   }
 
-  findAll(queryFindAllDto: QueryFindAllDto) {
-    const { limit = 100, page = 1, status = 'active' } = queryFindAllDto;
+  async findAll(
+    queryFindAllDto: QueryFindAllDto,
+  ): Promise<PaginationResultWithDataDto<Employee>> {
+    const { limit = 100, page = 1, status = '' } = queryFindAllDto;
 
-    return this.employeeModel
+    const employees = await this.employeeModel
       .find({
-        isActive: status,
+        ...(status !== '' && { status }),
       })
       .populate({
         path: 'services',
@@ -47,6 +52,13 @@ export class EmployeeService {
       })
       .limit(limit)
       .skip((page - 1) * limit);
+
+    return {
+      total: await this.employeeModel.countDocuments({ isActive: status }),
+      limit: limit,
+      page: page,
+      data: employees,
+    };
   }
 
   async findOne(term: string) {
@@ -67,10 +79,15 @@ export class EmployeeService {
     return employee;
   }
 
+  async findOneByName(name: string) {
+    const employee = await this.employeeModel.findOne({
+      name: name,
+    });
+    return !!employee;
+  }
+
   async update(term: string, updateEmployeeDtoDto: UpdateEmployeeDto) {
     let employee = await this.findOne(term);
-    if (updateEmployeeDtoDto.name)
-      updateEmployeeDtoDto.name = updateEmployeeDtoDto.name.toLowerCase();
 
     try {
       await employee.updateOne(updateEmployeeDtoDto);
@@ -82,9 +99,24 @@ export class EmployeeService {
 
   async statusChange(id: string) {
     let employee = await this.findOne(id);
-    employee.status = 'inactive';
+    if (employee.status === 'active') employee.status = 'inactive';
+    else employee.status = 'active';
+
     try {
       await employee.save();
+      return employee;
+    } catch (error) {
+      this.handleException(error);
+    }
+  }
+
+  async remove(id: string) {
+    let employee = await this.findOne(id);
+    if (!employee) throw new BadRequestException(`Employee not found`);
+    if (employee.services.length > 0)
+      throw new BadRequestException(`Employee tiene servicios asociados`);
+    try {
+      await employee.remove();
       return employee;
     } catch (error) {
       this.handleException(error);

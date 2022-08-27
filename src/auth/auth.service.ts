@@ -37,6 +37,17 @@ export class AuthService {
   }
 
   async login(loginUserDto: LoginUserDto) {
+    const user = await this.validUser(loginUserDto);
+    if (!!user) {
+      user.password = undefined;
+      return {
+        user: user,
+        token: this.getJwtToken({ id: user._id }),
+      };
+    }
+  }
+
+  async validUser(loginUserDto) {
     const { password, email } = loginUserDto;
 
     const user = await this.authModel
@@ -50,11 +61,7 @@ export class AuthService {
     if (!bcrypt.compareSync(password, user.password))
       throw new BadRequestException('Las credenciales son invalidas');
 
-    user.password = undefined;
-    return {
-      user: user,
-      token: this.getJwtToken({ id: user._id }),
-    };
+    return user;
   }
 
   private getJwtToken(payload: JwtPayload) {
