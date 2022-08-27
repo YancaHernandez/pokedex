@@ -46,9 +46,10 @@ export class ServiceService {
     }
   }
 
-  findAll(queryFindAllDto: QueryFindAllDto) {
+  async findAll(queryFindAllDto: QueryFindAllDto) {
     const { limit = 10, page = 1, dateTime = '' } = queryFindAllDto;
-    return this.serviceModel
+
+    const services = await this.serviceModel
       .find({
         ...(dateTime !== '' && {
           createdAt: dateTime,
@@ -59,8 +60,18 @@ export class ServiceService {
         select: ['name', 'status'],
       })
       .limit(limit)
-      .skip((page - 1) * limit)
-      .exec();
+      .skip((page - 1) * limit);
+
+    return {
+      total: await this.serviceModel.countDocuments({
+        ...(dateTime !== '' && {
+          createdAt: dateTime,
+        }),
+      }),
+      limit: limit,
+      page: page,
+      data: services,
+    };
   }
 
   async findOne(term: string) {
