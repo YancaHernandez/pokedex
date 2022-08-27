@@ -52,7 +52,10 @@ export class ServiceService {
     const services = await this.serviceModel
       .find({
         ...(dateTime !== '' && {
-          createdAt: dateTime,
+          createdAt: {
+            $gte: moment(dateTime).startOf('day').toDate(),
+            $lte: moment(dateTime).endOf('day').toDate(),
+          },
         }),
       })
       .populate({
@@ -65,7 +68,10 @@ export class ServiceService {
     return {
       total: await this.serviceModel.countDocuments({
         ...(dateTime !== '' && {
-          createdAt: dateTime,
+          createdAt: {
+            $gte: moment(dateTime).startOf('day').toDate(),
+            $lte: moment(dateTime).endOf('day').toDate(),
+          },
         }),
       }),
       limit: limit,
