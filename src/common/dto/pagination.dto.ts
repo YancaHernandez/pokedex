@@ -1,4 +1,4 @@
-import { ApiParam, ApiQuery } from '@nestjs/swagger';
+import { ApiParam, ApiProperty, ApiQuery } from '@nestjs/swagger';
 import {
   IsDateString,
   IsEnum,

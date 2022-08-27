@@ -47,11 +47,11 @@ export class ServiceService {
   }
 
   findAll(queryFindAllDto: QueryFindAllDto) {
-    const { limit = 10, page = 1, day = '' } = queryFindAllDto;
+    const { limit = 10, page = 1, dateTime = '' } = queryFindAllDto;
     return this.serviceModel
       .find({
-        ...(day !== '' && {
-          createdAt: day,
+        ...(dateTime !== '' && {
+          createdAt: dateTime,
         }),
       })
       .populate({
