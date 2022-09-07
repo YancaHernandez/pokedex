@@ -47,7 +47,7 @@ export class ServiceService {
   }
 
   async findAll(queryFindAllDto: QueryFindAllDto) {
-    const { limit = 10, page = 1, dateTime = '' } = queryFindAllDto;
+    const { limit = 500, page = 1, dateTime = '' } = queryFindAllDto;
 
     const services = await this.serviceModel
       .find({

@@ -25,8 +25,3 @@ export class Employee extends Document {
 }
 
 export const EmployeeShema = SchemaFactory.createForClass(Employee);
-// EmployeeShema.virtual('Services', {
-//   ref: 'Service',
-//   localField: '_id',
-//   foreignField: 'employee',
-// });
