@@ -40,12 +40,6 @@ export class ServiceController {
     name: 'page',
     example: 1,
   })
-  @ApiQuery({
-    name: 'day',
-    type: 'date',
-    required: false,
-    example: '2020-01-01',
-  })
   findAll(@Query() queryFindAllDto: QueryFindAllDto) {
     return this.serviceService.findAll(queryFindAllDto);
   }

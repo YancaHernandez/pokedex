@@ -46,12 +46,16 @@ export class ServiceService {
     }
   }
 
-  findAll(queryFindAllDto: QueryFindAllDto) {
-    const { limit = 10, page = 1, day = '' } = queryFindAllDto;
-    return this.serviceModel
+  async findAll(queryFindAllDto: QueryFindAllDto) {
+    const { limit = 500, page = 1, dateTime = '' } = queryFindAllDto;
+
+    const services = await this.serviceModel
       .find({
-        ...(day !== '' && {
-          createdAt: day,
+        ...(dateTime !== '' && {
+          createdAt: {
+            $gte: moment(dateTime).startOf('day').toDate(),
+            $lte: moment(dateTime).endOf('day').toDate(),
+          },
         }),
       })
       .populate({
@@ -59,8 +63,21 @@ export class ServiceService {
         select: ['name', 'status'],
       })
       .limit(limit)
-      .skip((page - 1) * limit)
-      .exec();
+      .skip((page - 1) * limit);
+
+    return {
+      total: await this.serviceModel.countDocuments({
+        ...(dateTime !== '' && {
+          createdAt: {
+            $gte: moment(dateTime).startOf('day').toDate(),
+            $lte: moment(dateTime).endOf('day').toDate(),
+          },
+        }),
+      }),
+      limit: limit,
+      page: page,
+      data: services,
+    };
   }
 
   async findOne(term: string) {
