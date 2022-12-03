@@ -1,12 +1,33 @@
 version: '3'
 
-services: 
-  db:
-    image: mongo:5
-    restart: always
+services:
+  deluxapp:
+    # depends_on:
+    #   - db
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    image: delux-docker
+    container_name: deluxapp
+    restart: always # reiniciar el contenedor si se detiene
     ports:
-      - 27017:27017
+      - "${PORT}:${PORT}"
+    # working_dir: /var/www/delux
     environment:
-      MONGODB_DATABASE: nest-delux
-    volumes:
-      - ./mongo:/data/db
+      MONGODB: ${MONGODB}
+      PORT: ${PORT}
+      DEFAULT_LIMIT: ${DEFAULT_LIMIT}
+      JWT_SECRET: ${JWT_SECRET}
+    # volumes:
+    #   - ./:/var/www/delux
+
+  # db:
+  #   image: mongo:5
+  #   container_name: mongo-delux
+  #   restart: always
+  #   ports:
+  #     - 27017:27017
+  #   environment:
+  #     MONGODB_DATABASE: nest-delux
+  #   volumes:
+  #     - ./mongo:/data/db

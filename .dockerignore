@@ -2,3 +2,4 @@ dist/
 node_modues/
 .gitignore
 .git/
+mongo/
